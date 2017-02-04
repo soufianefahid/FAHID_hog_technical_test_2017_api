@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,13 +18,15 @@ public class User {
 	@Id
 	@GeneratedValue
 	private int id;
+	@Column(unique = true)
 	private String login;
 	private String password;
+	@Column(unique = true)
 	private String email;
 	private String nom;
 	private String prenom;
 	private String accessToken;
-	@OneToMany(cascade = {CascadeType.ALL})
+	@OneToMany(cascade = {CascadeType.REMOVE})
 	private List<Participation> participations;
 	
 	public User() {
@@ -124,7 +127,6 @@ public class User {
 		
 		rs += "\"id\":"+id+",";
 		rs += "\"login\":\""+login+"\",";
-		rs += "\"password\":\""+password+"\",";
 		rs += "\"email\":\""+email+"\",";
 		rs += "\"nom\":\""+nom+"\",";
 		rs += "\"prenom\":\""+prenom+"\",";
@@ -132,6 +134,15 @@ public class User {
 		if( withToken ) {
 			rs += "\"token\":\""+accessToken+"\",";
 		}
+		
+		rs += "\"participations\":[";
+		for( Participation participation : participations ) {
+			rs += participation.toJSON() + ",";
+		}
+		if( participations.size() > 0 ) {
+			rs = rs.substring(0, rs.length()-1);
+		}
+		rs += "],";
 		
 		rs = rs.substring(0, rs.length()-1);
 		
@@ -159,5 +170,10 @@ public class User {
 	
 	public boolean isValid() {
 		return !Tools.stringIsEmpty(login) && !Tools.stringIsEmpty(password) && Tools.emailIsValid(email);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return id == ( (User) obj ).id;
 	}
 }

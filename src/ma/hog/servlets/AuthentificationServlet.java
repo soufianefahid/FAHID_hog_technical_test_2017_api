@@ -14,7 +14,7 @@ import ma.hog.utils.AppException;
 /**
  * Servlet implementation class AuthentificationServlet
  */
-@WebServlet("/Authentification")
+@WebServlet("/authentification")
 public class AuthentificationServlet extends BaseServlet {
 	private static final long serialVersionUID = 1L;
 	

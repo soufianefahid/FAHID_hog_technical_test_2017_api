@@ -49,7 +49,12 @@ public class UsersServlet extends BaseServlet {
     	user.setAccessToken( Tools.generateAccessToken() );
     	
     	MainDAO dao = MainDAO.getInstance();
-    	dao.insertUser(user);
+    	try {
+    		dao.insertUser(user);
+    	} catch (Exception e) {
+    		throw new AppException("Error during user creation", e.getMessage());
+    	}
+    	
     	
     	return user.toJSON();
     }
@@ -72,10 +77,9 @@ public class UsersServlet extends BaseServlet {
     	User user = null;
     	
     	try {
-    		int id = Integer.parseInt( request.getParameter("id") );
-    		user = dao.findUser(id);
+    		user = (User) request.getAttribute("user");
     	} catch(Exception e) {
-    		throw new AppException(400, "Invalid input", "Error in user id");
+    		throw new AppException(400, "User not found", "User not found");
     	}
     	
     	if( user == null ) {
@@ -115,28 +119,6 @@ public class UsersServlet extends BaseServlet {
     }
     
     /**
-	 * /users/delete
-	 * delete user
-	 * temporarily disabled
-     * @throws AppException 
-	 */
-	@Override
-    protected String delete(HttpServletRequest request, HttpServletResponse response) throws AppException {
-    	User user = null;
-    	MainDAO dao = MainDAO.getInstance();
-    	
-    	try {
-    		int id = Integer.parseInt( request.getParameter("id") );
-    		user = dao.findUser(id);
-    	} catch(Exception e) {
-    		throw new AppException(400, "Invalid input", "Error in user id");
-    	}
-    	
-    	dao.removeUser(user);
-    	return "{ \"deleted\" : true }";
-    }
-    
-    /**
 	 * /users/show
 	 * show user
      * @throws AppException 
@@ -146,11 +128,17 @@ public class UsersServlet extends BaseServlet {
 		User user = null;
     	MainDAO dao = MainDAO.getInstance();
     	
-    	try {
-    		int id = Integer.parseInt( request.getParameter("id") );
-    		user = dao.findUser(id);
-    	} catch(Exception e) {
-    		throw new AppException(400, "Invalid input", "Error in user id");
+    	String strID = request.getParameter("id");
+    	
+    	if( Tools.stringIsEmpty(strID) || strID.equals("me") ) {
+    		user = (User) request.getAttribute("user");
+    	} else {
+    		try {
+        		int id = Integer.parseInt( request.getParameter("id") );
+        		user = dao.findUser(id);
+        	} catch(Exception e) {
+        		throw new AppException(400, "Invalid input", "Error in user id");
+        	}
     	}
     	
     	if( user == null ) {
@@ -159,4 +147,24 @@ public class UsersServlet extends BaseServlet {
     	return user.toJSON();
     }
 	
+	/**
+	 * /users/delete
+	 * delete user
+	 * temporarily disabled
+     * @throws AppException 
+	 */
+	/*
+	@Override
+    protected String delete(HttpServletRequest request, HttpServletResponse response) throws AppException {
+    	User user = (User) request.getAttribute("user");
+    	MainDAO dao = MainDAO.getInstance();
+    	
+    	if( user == null ) {
+    		throw new AppException(400, "User not found", "User not found");
+    	}
+    	
+    	dao.removeUser(user);
+    	return "{ \"deleted\" : true }";
+    }
+    */
 }

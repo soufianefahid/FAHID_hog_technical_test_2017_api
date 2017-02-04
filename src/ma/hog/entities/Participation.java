@@ -24,7 +24,10 @@ public class Participation {
 	private boolean isOwner;
 	
 	public Participation() {
-		// TODO Auto-generated constructor stub
+		user = null;
+		conversation = null;
+		lastSeen = new Date();
+		isOwner = false;
 	}
 
 	public int getId() {
@@ -85,5 +88,10 @@ public class Participation {
 	
 	public boolean isValid() {
 		return (user != null && conversation != null);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return id == ( (Participation) obj ).id;
 	}
 }

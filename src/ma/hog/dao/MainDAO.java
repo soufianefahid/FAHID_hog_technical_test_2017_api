@@ -72,6 +72,14 @@ public class MainDAO {
 		return rs.size() > 0 ? rs.get(0) : null;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public User findUserByAccessToken(String accessToken) {
+		Query query = em.createQuery("SELECT e FROM User e WHERE e.accessToken = :accessToken");
+		query.setParameter("accessToken", accessToken);
+		List<User> rs = (List<User>) query.getResultList();
+		return rs.size() > 0 ? rs.get(0) : null;
+	}
+	
 	public void removeUser(User obj) {
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();

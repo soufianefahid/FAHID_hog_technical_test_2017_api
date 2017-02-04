@@ -4,6 +4,9 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     
       <class>ma.hog.entities.User</class>
+      <class>ma.hog.entities.Message</class>
+      <class>ma.hog.entities.Conversation</class>
+      <class>ma.hog.entities.Participation</class>
   
     <properties>
     <property name="eclipselink.target-database" value="MySQL"/>

@@ -131,4 +131,9 @@ public class Message {
 	public boolean isValid() {
 		return (!Tools.stringIsEmpty(content) && author != null);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return id == ( (Message) obj ).id;
+	}
 }

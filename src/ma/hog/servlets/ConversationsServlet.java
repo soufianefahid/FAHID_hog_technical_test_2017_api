@@ -25,15 +25,8 @@ public class ConversationsServlet extends BaseServlet {
 			HttpServletResponse response) throws IOException, AppException {
 		
 		MainDAO dao = MainDAO.getInstance();
-		String subject = (String) request.getAttribute("subject");
-		User user = null;
-    	
-    	try {
-    		int userID = Integer.parseInt( request.getParameter("user") );
-    		user = dao.findUser(userID);
-    	} catch(Exception e) {
-    		throw new AppException(400, "Invalid input", "Error in user id");
-    	}
+		String subject = (String) request.getParameter("subject");
+		User user = (User) request.getAttribute("user");
     	
     	if( user == null ) {
     		throw new AppException(400, "User not found", "User not found");
@@ -48,8 +41,14 @@ public class ConversationsServlet extends BaseServlet {
     	participation.setUser(user);
     	
     	conversation.getParticipations().add(participation);
+    	user.getParticipations().add(participation);
+    	
+    	if( !conversation.isValid() ) {
+    		throw new AppException(400, "invalid inputs", "conversation not valid");
+    	}
     	
     	dao.insertConversation(conversation);
+    	dao.updateUser(user);
     	
     	return conversation.toJSON();
 	}
@@ -59,6 +58,7 @@ public class ConversationsServlet extends BaseServlet {
 			HttpServletResponse response) throws IOException, AppException {
 		MainDAO dao = MainDAO.getInstance();
 		Conversation conversation = null;
+		User user = (User) request.getAttribute("user");
 		
 		try {
     		int id = Integer.parseInt( request.getParameter("id") );
@@ -67,9 +67,22 @@ public class ConversationsServlet extends BaseServlet {
     		throw new AppException(400, "Invalid input", "Error in conversation id");
     	}
 		
-		if( conversation == null ) {
-    		throw new AppException(400, "conversation not found", "conversation not found");
+		if( conversation == null || user == null ) {
+    		throw new AppException(400, "conversation / user not found", "conversation / user not found");
     	}
+		
+		boolean canShow = false;
+		
+		for( Participation participation : conversation.getParticipations() ) {
+			if( participation.getUser().getId() == user.getId() ) {
+				canShow = true;
+				break;
+			}
+		}
+		
+		if( !canShow ) {
+			throw new AppException(403, "authorization error", "authentificated user can't show the conversation");
+		}
 		
 		return conversation.toJSON();
 	}

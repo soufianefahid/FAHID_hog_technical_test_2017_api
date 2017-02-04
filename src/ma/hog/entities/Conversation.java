@@ -1,5 +1,6 @@
 package ma.hog.entities;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +29,10 @@ public class Conversation {
 	private List<Message> messages;
 	
 	public Conversation() {
-		// TODO Auto-generated constructor stub
+		subject = "";
+		createdAt = new Date();
+		participations = new ArrayList<Participation>();
+		messages = new ArrayList<Message>();
 	}
 
 	public int getId() {
@@ -117,5 +121,10 @@ public class Conversation {
 	
 	public boolean isValid() {
 		return (!Tools.stringIsEmpty(subject) && participations != null && participations.size() > 0);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return id == ( (Conversation) obj ).id;
 	}
 }
