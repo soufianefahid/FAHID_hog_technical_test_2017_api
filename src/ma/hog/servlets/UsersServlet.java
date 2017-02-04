@@ -3,82 +3,32 @@ package ma.hog.servlets;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ma.hog.dao.MainDAO;
 import ma.hog.entities.User;
+import ma.hog.utils.AppException;
+import ma.hog.utils.Tools;
 
 /**
  * Servlet implementation class Users
  * 
  */
 @WebServlet(urlPatterns = {"/users/create", "/users/update", "/users/list", "/users/delete", "/users/show"})
-public class Users extends HttpServlet {
+public class UsersServlet extends BaseServlet {
 	
 	private static final long serialVersionUID = -3003511691726486046L;
-
-	public Users() {
-        super();
-    }
-
-	/**
-	 * Handle GET request
-	 */
-    @Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	String servletPath = request.getServletPath().toString();
-		String[] tokens = servletPath.split("/");
-		String operation = tokens[ tokens.length - 1 ];
-		String result = null;
-		switch (operation) {
-		case "create":
-			result = create(request, response);
-			break;
-		case "update":
-			result = update(request, response);
-			break;
-		case "list":
-			result = list(request, response);
-			break;
-		case "delete":
-			result = delete(request, response);
-			break;
-		case "show":
-			result = show(request, response);
-			break;
-		default:
-			throw new ServletException("users servlet : operation not supported > "+operation);
-		}
-		
-		response.setStatus(200);
-		response.setContentType("application/json");
-		response.addHeader("Access-Control-Allow-Origin", "*");
-	    response.addHeader("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS, DELETE");
-	    response.addHeader("Access-Control-Allow-Headers", "Content-Type");
-	    response.addHeader("Access-Control-Max-Age", "86400");
-		response.getWriter().write(result);
-	}
-    
-    /**
-	 * Handle POST request
-	 * delegate to doGet
-	 */
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-    		throws ServletException, IOException {
-    	doGet(req, resp);
-    }
     
     /**
 	 * /users/create
 	 * create user
      * @throws IOException 
+     * @throws AppException 
 	 */
-    private String create(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	@Override
+    protected String create(HttpServletRequest request, HttpServletResponse response) throws IOException, AppException {
     	String login = request.getParameter("login");
     	String password = request.getParameter("password");
     	String email = request.getParameter("email");
@@ -92,6 +42,12 @@ public class Users extends HttpServlet {
     	user.setNom(nom);
     	user.setPrenom(prenom);
     	
+    	if( !user.isValid() ) {
+    		throw new AppException(400, "Missing attributes", "Missing attributes");
+    	}
+    	
+    	user.setAccessToken( Tools.generateAccessToken() );
+    	
     	MainDAO dao = MainDAO.getInstance();
     	dao.insertUser(user);
     	
@@ -102,8 +58,10 @@ public class Users extends HttpServlet {
 	 * /users/update
 	 * update user
      * @throws IOException 
+     * @throws AppException 
 	 */
-    private String update(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	@Override
+    protected String update(HttpServletRequest request, HttpServletResponse response) throws IOException, AppException {
     	int id = Integer.parseInt( request.getParameter("id") );
     	String password = request.getParameter("password");
     	String email = request.getParameter("email");
@@ -113,6 +71,11 @@ public class Users extends HttpServlet {
     	MainDAO dao = MainDAO.getInstance();
     	
     	User user = dao.findUser(id);
+    	
+    	if( user == null ) {
+    		throw new AppException(400, "User not found", "User not found");
+    	}
+    	
     	user.setPassword(password);
     	user.setEmail(email);
     	user.setNom(nom);
@@ -123,10 +86,11 @@ public class Users extends HttpServlet {
     }
     
     /**
-	 * /users/update
+	 * /users/list
 	 * list all users
 	 */
-    private String list(HttpServletRequest request, HttpServletResponse response) {
+	@Override
+    protected String list(HttpServletRequest request, HttpServletResponse response) {
     	MainDAO dao = MainDAO.getInstance();
     	List<User> users = dao.findAllUsers();
     	
@@ -147,8 +111,10 @@ public class Users extends HttpServlet {
     /**
 	 * /users/delete
 	 * delete user
+	 * temporarily disabled
 	 */
-    private String delete(HttpServletRequest request, HttpServletResponse response) {
+	@Override
+    protected String delete(HttpServletRequest request, HttpServletResponse response) {
     	int id = Integer.parseInt( request.getParameter("id") );
     	MainDAO dao = MainDAO.getInstance();
     	User user = dao.findUser(id);
@@ -159,11 +125,16 @@ public class Users extends HttpServlet {
     /**
 	 * /users/show
 	 * show user
+     * @throws AppException 
 	 */
-    private String show(HttpServletRequest request, HttpServletResponse response) {
+	@Override
+    protected String show(HttpServletRequest request, HttpServletResponse response) throws AppException {
     	int id = Integer.parseInt( request.getParameter("id") );
     	MainDAO dao = MainDAO.getInstance();
     	User user = dao.findUser(id);
+    	if( user == null ) {
+    		throw new AppException(400, "User not found", "User not found");
+    	}
     	return user.toJSON();
     }
 	

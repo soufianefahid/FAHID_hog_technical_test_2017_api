@@ -8,6 +8,9 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import ma.hog.entities.Conversation;
+import ma.hog.entities.Message;
+import ma.hog.entities.Participation;
 import ma.hog.entities.User;
 
 public class MainDAO {
@@ -70,6 +73,76 @@ public class MainDAO {
 	}
 	
 	public void removeUser(User obj) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.remove(obj);
+		tx.commit();
+	}
+	
+	// Participation Area
+	public void insertParticipation(Participation obj) {		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.persist(obj);
+		tx.commit();
+	}
+	
+	public void updateParticipation(Participation obj) {		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.merge(obj);
+		tx.commit();
+	}
+	
+	public void removeParticipation(Participation obj) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.remove(obj);
+		tx.commit();
+	}
+	
+	// Message Area
+	public void insertMessage(Message obj) {		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.persist(obj);
+		tx.commit();
+	}
+	
+	public void updateMessage(Message obj) {		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.merge(obj);
+		tx.commit();
+	}
+	
+	public void removeMessage(Message obj) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.remove(obj);
+		tx.commit();
+	}
+	
+	// Conversation Area
+	public void insertConversation(Conversation obj) {		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.persist(obj);
+		tx.commit();
+	}
+	
+	public void updateConversation(Conversation obj) {		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		em.merge(obj);
+		tx.commit();
+	}
+	
+	public Conversation findConversation(int id) {
+		return em.find(Conversation.class, id);
+	}
+	
+	public void removeConversation(Conversation obj) {
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();
 		em.remove(obj);
