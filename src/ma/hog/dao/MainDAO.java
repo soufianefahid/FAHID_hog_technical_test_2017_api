@@ -101,6 +101,10 @@ public class MainDAO {
 		tx.commit();
 	}
 	
+	public Participation findParticipation(int id) {
+		return em.find(Participation.class, id);
+	}
+	
 	// Message Area
 	public void insertMessage(Message obj) {		
 		EntityTransaction tx = em.getTransaction();
@@ -121,6 +125,10 @@ public class MainDAO {
 		tx.begin();
 		em.remove(obj);
 		tx.commit();
+	}
+	
+	public Message findMessage(int id) {
+		return em.find(Message.class, id);
 	}
 	
 	// Conversation Area

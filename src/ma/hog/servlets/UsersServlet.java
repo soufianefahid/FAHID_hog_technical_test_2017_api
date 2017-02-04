@@ -62,15 +62,21 @@ public class UsersServlet extends BaseServlet {
 	 */
 	@Override
     protected String update(HttpServletRequest request, HttpServletResponse response) throws IOException, AppException {
-    	int id = Integer.parseInt( request.getParameter("id") );
+    	
     	String password = request.getParameter("password");
     	String email = request.getParameter("email");
     	String nom = request.getParameter("nom");
     	String prenom = request.getParameter("prenom");
     	
     	MainDAO dao = MainDAO.getInstance();
+    	User user = null;
     	
-    	User user = dao.findUser(id);
+    	try {
+    		int id = Integer.parseInt( request.getParameter("id") );
+    		user = dao.findUser(id);
+    	} catch(Exception e) {
+    		throw new AppException(400, "Invalid input", "Error in user id");
+    	}
     	
     	if( user == null ) {
     		throw new AppException(400, "User not found", "User not found");
@@ -112,12 +118,20 @@ public class UsersServlet extends BaseServlet {
 	 * /users/delete
 	 * delete user
 	 * temporarily disabled
+     * @throws AppException 
 	 */
 	@Override
-    protected String delete(HttpServletRequest request, HttpServletResponse response) {
-    	int id = Integer.parseInt( request.getParameter("id") );
+    protected String delete(HttpServletRequest request, HttpServletResponse response) throws AppException {
+    	User user = null;
     	MainDAO dao = MainDAO.getInstance();
-    	User user = dao.findUser(id);
+    	
+    	try {
+    		int id = Integer.parseInt( request.getParameter("id") );
+    		user = dao.findUser(id);
+    	} catch(Exception e) {
+    		throw new AppException(400, "Invalid input", "Error in user id");
+    	}
+    	
     	dao.removeUser(user);
     	return "{ \"deleted\" : true }";
     }
@@ -129,9 +143,16 @@ public class UsersServlet extends BaseServlet {
 	 */
 	@Override
     protected String show(HttpServletRequest request, HttpServletResponse response) throws AppException {
-    	int id = Integer.parseInt( request.getParameter("id") );
+		User user = null;
     	MainDAO dao = MainDAO.getInstance();
-    	User user = dao.findUser(id);
+    	
+    	try {
+    		int id = Integer.parseInt( request.getParameter("id") );
+    		user = dao.findUser(id);
+    	} catch(Exception e) {
+    		throw new AppException(400, "Invalid input", "Error in user id");
+    	}
+    	
     	if( user == null ) {
     		throw new AppException(400, "User not found", "User not found");
     	}
