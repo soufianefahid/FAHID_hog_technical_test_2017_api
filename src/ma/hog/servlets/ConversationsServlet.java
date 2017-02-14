@@ -1,6 +1,8 @@
 package ma.hog.servlets;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +28,7 @@ public class ConversationsServlet extends BaseServlet {
 		
 		MainDAO dao = MainDAO.getInstance();
 		String subject = (String) request.getParameter("subject");
+		String participants = (String) request.getParameter("participants");
 		User user = (User) request.getAttribute("user");
     	
     	if( user == null ) {
@@ -40,8 +43,31 @@ public class ConversationsServlet extends BaseServlet {
     	participation.setOwner(true);
     	participation.setUser(user);
     	
-    	conversation.getParticipations().add(participation);
     	user.getParticipations().add(participation);
+    	
+    	List<Participation> participations = new ArrayList<Participation>();
+    	List<User> users = new ArrayList<User>();
+    	
+    	String[] tokens = participants != null ? participants.split(",") : new String[0];
+    	for( String token : tokens ) {
+    		try {
+    			User u = dao.findUser( Integer.parseInt( token ) );
+    			Participation p = new Participation();
+    			p.setConversation(conversation);
+    			p.setUser(u);
+    			
+    			u.getParticipations().add(p);
+    			
+    			users.add(u);
+    			participations.add(p);
+    		} catch (Exception e) {
+    			continue;
+    		}
+    	}
+    	
+    	participations.add(participation);
+    	
+    	conversation.setParticipations(participations);
     	
     	if( !conversation.isValid() ) {
     		throw new AppException(400, "invalid inputs", "conversation not valid");
@@ -49,6 +75,9 @@ public class ConversationsServlet extends BaseServlet {
     	
     	dao.insertConversation(conversation);
     	dao.updateUser(user);
+    	for( User u : users ) {
+    		dao.updateUser(u);
+    	}
     	
     	return conversation.toJSON();
 	}

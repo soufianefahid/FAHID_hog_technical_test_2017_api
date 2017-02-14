@@ -98,16 +98,26 @@ public class UsersServlet extends BaseServlet {
     /**
 	 * /users/list
 	 * list all users
+     * @throws AppException 
 	 */
 	@Override
-    protected String list(HttpServletRequest request, HttpServletResponse response) {
+    protected String list(HttpServletRequest request, HttpServletResponse response) throws AppException {
     	MainDAO dao = MainDAO.getInstance();
     	List<User> users = dao.findAllUsers();
+    	User user = null;
+    	
+    	try {
+    		user = (User) request.getAttribute("user");
+    	} catch(Exception e) {
+    		throw new AppException(400, "User not found", "User not found");
+    	}
+    	
+    	users.remove(user);
     	
     	String rs = "[";
     	
-    	for( User user : users ) {
-    		rs += user.toJSON() + ",";
+    	for( User u : users ) {
+    		rs += u.toMiniJSON() + ",";
     	}
     	
     	if( users.size() > 0 ) {

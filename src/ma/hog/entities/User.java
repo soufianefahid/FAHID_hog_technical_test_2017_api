@@ -26,7 +26,7 @@ public class User {
 	private String nom;
 	private String prenom;
 	private String accessToken;
-	@OneToMany(cascade = {CascadeType.REMOVE})
+	@OneToMany(cascade = {CascadeType.ALL})
 	private List<Participation> participations;
 	
 	public User() {
